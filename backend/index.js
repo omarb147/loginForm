@@ -1,3 +1,13 @@
+// const path = require("path");
+// const fs = require("fs");
+// const https = require("https");
+// const http = require("http");
+
+// var certOptions = {
+//   key: fs.readFileSync(path.resolve("cert/server.key")),
+//   cert: fs.readFileSync(path.resolve("cert/server.crt"))
+// };
+
 const express = require("express");
 const dotenv = require("dotenv");
 const passport = require("passport");
@@ -59,6 +69,78 @@ app.post("/login", passport.authenticate("local"), (req, res) => {
   res.status(400).send({ message: "logged in using passport" });
 });
 
+const FacebookStrategy = require("passport-facebook");
+
+passport.use(
+  new FacebookStrategy(
+    {
+      clientID: process.env.FACEBOOK_APP_ID,
+      clientSecret: process.env.FACEBOOK_APP_SECRET,
+      callbackURL: "http://localhost:4000/auth/facebook/callback"
+    },
+    async function(accessToken, refreshToken, profile, done) {
+      try {
+        const existingUser = await db("login")
+          .where("identifier", profile.id)
+          .first();
+
+        if (!existingUser) {
+          await db("login")
+            .insert({ identifier: profile.id, service: profile.provider })
+            .returning()
+            .then(user => done(null, user))
+            .catch(err => console.log(err));
+        }
+        return done(null, existingUser);
+      } catch (err) {
+        return done(err);
+      }
+    }
+  )
+);
+
+app.get("/auth/facebook", passport.authenticate("facebook", { scope: ["email"] }));
+
+app.get("/auth/facebook/callback", passport.authenticate("facebook", { successRedirect: "/", failureRedirect: "/login" }));
+
+const GoogleStrategy = require("passport-google-oauth").OAuth2Strategy;
+
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "http://localhost:4000/auth/google/callback"
+    },
+    async function(accessToken, refreshToken, profile, done) {
+      try {
+        const existingUser = await db("login")
+          .where("identifier", profile.emails[0].value)
+          .first();
+
+        if (!existingUser) {
+          await db("login")
+            .insert({ identifier: profile.emails[0].value, service: profile.provider })
+            .returning()
+            .then(user => {
+              return done(null, user);
+            })
+            .catch(err => console.log(err));
+        }
+        done(null, existingUser);
+      } catch (err) {
+        return done(err);
+      }
+    }
+  )
+);
+
+app.get("/auth/google", passport.authenticate("google", { scope: ["email", "profile"] }));
+
+app.get("/auth/google/callback", passport.authenticate("google", { failureRedirect: "/login" }), function(req, res) {
+  res.redirect("/");
+});
+
 app.post("/register", async (req, res) => {
   const { email, password } = req.body;
 
@@ -89,10 +171,14 @@ app.post("/register", async (req, res) => {
 
 //SET UP DATABASE
 
-app.get("/", async (req, res) => "hello workld");
+app.get("/", async (req, res) => res.send("hello workld"));
 
 app.get("/");
 
 const PORT = process.env.PORT || 5000;
+// const httpServer = http.createServer(app);
+// const httpsServer = https.createServer(certOptions, app);
 
-app.listen(PORT, () => console.log(`App listening on port ${PORT}!`));
+// httpServer.listen(1000);
+// httpsServer.listen(PORT);
+app.listen(PORT, (res, req) => console.log(`App listening on PORT ${PORT}`));
