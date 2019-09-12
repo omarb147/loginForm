@@ -1,6 +1,5 @@
-const passport = require("passport");
 const dotenv = require("dotenv");
-const db = require("../Database/db");
+const db = require("../../Database/db");
 const bcrypt = require("bcrypt");
 dotenv.config();
 
@@ -9,8 +8,7 @@ dotenv.config();
 // LOCAL STRATEGY IMPLEMENTATION
 const LocalStrategy = require("passport-local").Strategy;
 
-const Local = new LocalStrategy({ usernameField: "identifier" }, async (username, password, done) => {
-  console.log("yes");
+const locaAuthStrategy = new LocalStrategy({ usernameField: "identifier" }, async (username, password, done) => {
   try {
     const user = await db("login")
       .where("identifier", username)
@@ -26,4 +24,4 @@ const Local = new LocalStrategy({ usernameField: "identifier" }, async (username
   }
 });
 
-module.exports = { Local };
+module.exports = { locaAuthStrategy };

@@ -9,51 +9,22 @@ dotenv.config();
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(passport.initialize());
-app.use(passport.session());
 
-passport.serializeUser(function(user, done) {
-  done(null, user.id);
-});
+const Passport = require("./Passport");
+app.use(Passport);
 
-passport.deserializeUser(async function(id, done) {
-  let user = await db("login")
-    .where("id", id)
-    .first();
-  done(null, user);
-});
-
-//AUTH STRATEGIES
-const { Local } = require("./Passport/Local");
-passport.use(Local);
-
-app.post(
-  "/login",
-  passport.authenticate("local", {
-    successRedirect: "/loggedin",
-    failureRedirect: "/"
-  }),
-  (req, res) => {
-    res.status(400).send({ message: "logged in using passport" });
-  }
-);
-
-app.get("/auth/facebook", passport.authenticate("facebook", { scope: ["email"] }));
-
-app.get("/auth/facebook/callback", passport.authenticate("facebook", { successRedirect: "/", failureRedirect: "/login" }));
-
-app.get("/auth/google", passport.authenticate("google", { scope: ["email", "profile"] }));
-
-app.get("/auth/google/callback", passport.authenticate("google", { failureRedirect: "/login" }), function(req, res) {
-  res.redirect("/");
-});
+//Set up Routes
+const auth = require("./Routes/Auth");
+const profile = require("./Routes/Profile");
+app.use("/profile", passport.authenticate("jwt", { session: false }), profile);
+app.use("/auth", auth);
 
 app.post("/register", async (req, res) => {
-  const { email, password } = req.body;
+  const { identifier, password } = req.body;
 
   try {
     const existingUser = await db("login")
-      .where("identifier", email)
+      .where("identifier", identifier)
       .first();
 
     if (existingUser) return res.status(400).send({ message: "User with that username already exists" });
@@ -61,7 +32,7 @@ app.post("/register", async (req, res) => {
     const hash = await bcrypt.hash(password, 10);
 
     user = {
-      identifier: email,
+      identifier,
       hash
     };
 
@@ -80,12 +51,6 @@ app.post("/register", async (req, res) => {
 
 app.get("/", async (req, res) => res.send("hello workld"));
 
-app.get("/");
-
 const PORT = process.env.PORT || 5000;
-// const httpServer = http.createServer(app);
-// const httpsServer = https.createServer(certOptions, app);
 
-// httpServer.listen(1000);
-// httpsServer.listen(PORT);
 app.listen(PORT, (res, req) => console.log(`App listening on PORT ${PORT}`));
