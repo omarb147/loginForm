@@ -17,7 +17,6 @@ const { locaAuthStrategy } = require("./Strategies/LocalStrategy");
 const { facebookAuthStrategy } = require("./Strategies/FacebookStrategy");
 const { googleAuthStrategy } = require("./Strategies/GoogleStrategy");
 const jwtAuthStrategy = require("./Strategies/JWTStrategy");
-console.log(jwtAuthStrategy);
 passport.use(jwtAuthStrategy);
 passport.use(locaAuthStrategy);
 passport.use(facebookAuthStrategy);

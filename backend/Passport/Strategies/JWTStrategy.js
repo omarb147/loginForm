@@ -1,6 +1,6 @@
 const dotenv = require("dotenv");
-const db = require("../../Database/db");
-const findLoginOrInsert = require("../../Database/queries");
+const db = require("../../db");
+const findLoginOrInsert = require("../../Models/users");
 dotenv.config();
 
 //JWT STRATEGY IMPLEMENTATION

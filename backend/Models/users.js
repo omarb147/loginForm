@@ -1,14 +1,14 @@
-const db = require("./db");
+const { db, TABLES } = require("../db");
 
-const findLoginOrInsert = async (identifier, credentials = {}, callback) => {
+exports.findUserOrInsert = async (identifier, credentials = {}, callback) => {
   try {
-    const existingUser = await db("login")
+    const existingUser = await db(TABLES.USERS)
       .where("identifier", identifier)
       .first();
 
     if (!existingUser && Object.keys(credentials) > 0) {
       try {
-        const newUser = await db("login").insert(credentials);
+        const newUser = await db(TABLES.USERS).insert(credentials);
         return cb((data = newUser), (error = null));
       } catch (error) {
         return cb((data = null), error);
@@ -22,5 +22,3 @@ const findLoginOrInsert = async (identifier, credentials = {}, callback) => {
     return callback((data = null), error);
   }
 };
-
-module.exports = findLoginOrInsert;

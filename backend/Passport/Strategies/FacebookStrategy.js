@@ -1,5 +1,5 @@
-const db = require("../../Database/db");
-const findLoginOrInsert = require("../../Database/queries");
+const db = require("../../db");
+const findLoginOrInsert = require("../../Models/users");
 const dotenv = require("dotenv");
 dotenv.config();
 
