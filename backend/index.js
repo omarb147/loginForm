@@ -2,6 +2,7 @@ const passport = require("passport");
 const express = require("express");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
+const cors = require("cors");
 dotenv.config();
 
 const app = express();
@@ -10,6 +11,9 @@ app.use(bodyParser.json());
 
 const Passport = require("./Passport");
 app.use(Passport);
+
+//Set up cors
+app.use(cors({ origin: "*" }));
 
 //Set up Routes
 const auth = require("./Routes/Auth");

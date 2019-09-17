@@ -6,12 +6,13 @@ exports.findUserOrInsert = async (identifier, credentials = {}, callback) => {
       .where("identifier", identifier)
       .first();
 
-    if (!existingUser && Object.keys(credentials) > 0) {
+    if (!existingUser && Object.keys(credentials).length > 0) {
       try {
         const newUser = await db(TABLES.USERS).insert(credentials);
-        return cb((data = newUser), (error = null));
+
+        return callback((data = newUser), (error = null));
       } catch (error) {
-        return cb((data = null), error);
+        return callback((data = null), error);
       }
     }
 

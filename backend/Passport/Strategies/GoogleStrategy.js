@@ -1,5 +1,5 @@
 const db = require("../../db");
-const findLoginOrInsert = require("../../Models/users");
+const { findUserOrInsert } = require("../../Models/users");
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -15,7 +15,8 @@ const googleAuthStrategy = new GoogleStrategy(
   async function(accessToken, refreshToken, profile, done) {
     const email = profile.emails[0].value;
 
-    findLoginOrInsert(email, { identifier: email, service: profile.provider }, (user, error) => {
+    findUserOrInsert(email, { identifier: email, provider: profile.provider }, (user, error) => {
+      console.log(user);
       if (user) return done(null, user);
       if (error) {
         console.log(error);

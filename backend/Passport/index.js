@@ -13,12 +13,12 @@ passport.deserializeUser(async function(id, done) {
 });
 
 //AUTH STRATEGIES
-const { locaAuthStrategy } = require("./Strategies/LocalStrategy");
+const { localAuthStrategy } = require("./Strategies/LocalStrategy");
 const { facebookAuthStrategy } = require("./Strategies/FacebookStrategy");
 const { googleAuthStrategy } = require("./Strategies/GoogleStrategy");
 const jwtAuthStrategy = require("./Strategies/JWTStrategy");
 passport.use(jwtAuthStrategy);
-passport.use(locaAuthStrategy);
+passport.use(localAuthStrategy);
 passport.use(facebookAuthStrategy);
 passport.use(googleAuthStrategy);
 

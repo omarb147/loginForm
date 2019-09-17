@@ -4,11 +4,10 @@ const passport = require("passport");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { db, TABLES } = require("../db");
-const { findUserOrInsert } = require("../Models/users");
 
 auth.get("/facebook", passport.authenticate("facebook", { scope: ["email"], session: false }));
 
-// REFACT THE Login PROCESSS
+// REFACTOR THE Login PROCESSS - JWT section
 auth.get("/facebook/callback", function(req, res, next) {
   passport.authenticate(
     "facebook",
@@ -52,7 +51,6 @@ auth.get("/google/callback", function(req, res, next) {
     if (err || !user) {
       return res.status(400).json({ msg: "something went wrong", user });
     }
-
     req.logIn(user, { session: false }, err => {
       if (err) return res.send(err);
       const token = jwt.sign(user, process.env.JWT_SECRET);
@@ -64,7 +62,6 @@ auth.get("/google/callback", function(req, res, next) {
 auth.post("/local", function(req, res, next) {
   passport.authenticate("local", { session: false }, (err, user, info) => {
     if (err || !user) {
-      console.log(user);
       return res.status(400).json({ msg: "something went wrong", user });
     }
 
@@ -110,7 +107,7 @@ auth.post("/register", async (req, res) => {
 
     return res.status(200).send({ message: "sucessfully added user", newUser });
   } catch (err) {
-    console.error(err.message);
+    console.log(err.message);
     res.status(500).send({ message: "something went wrong" });
   }
 });
