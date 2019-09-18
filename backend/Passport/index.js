@@ -1,4 +1,5 @@
 const passport = require("passport");
+const PassportSession = passport.session();
 const Passport = passport.initialize();
 
 passport.serializeUser(function(user, done) {
@@ -22,4 +23,4 @@ passport.use(localAuthStrategy);
 passport.use(facebookAuthStrategy);
 passport.use(googleAuthStrategy);
 
-module.exports = Passport;
+module.exports = { Passport, PassportSession };

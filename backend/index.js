@@ -3,14 +3,23 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const cookieSession = require("cookie-session");
 dotenv.config();
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-const Passport = require("./Passport");
+app.use(
+  cookieSession({
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+    keys: [process.env.COOKIE_KEY]
+  })
+);
+
+const { Passport, PassportSession } = require("./Passport");
 app.use(Passport);
+app.use(PassportSession);
 
 //Set up cors
 app.use(cors({ origin: "*" }));
