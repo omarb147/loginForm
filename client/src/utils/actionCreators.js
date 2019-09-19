@@ -1,31 +1,36 @@
-import { LOGIN_REQUEST } from "./Types";
+import { GET_CURRENT_USER, LOGOUT_USER, LOGIN_ERROR } from "./Types";
 import axios from "axios";
 
-export const loginRequest = (service, payload = {}) => {
+export const getCurrentUser = () => {
   return async dispatch => {
-    let res;
-
-    switch (service) {
-      case "facebook":
-        res = await axios.get("http://localhost:4000/auth/facebook");
-        break;
-      case "google":
-        res = await axios.get("http://localhost:4000/auth/google");
-        break;
-      case "local":
-        res = await axios.post("http://localhost:4000/auth/local", {
-          params: {
-            identifier: payload.identifier,
-            password: payload.password
-          }
-        });
-        break;
-    }
-    console.log(res);
-
-    return dispatch({
-      type: LOGIN_REQUEST,
-      token: res
+    const user = await axios.get("/auth/current_user");
+    dispatch({
+      type: GET_CURRENT_USER,
+      user: user.data
     });
+  };
+};
+
+export const logoutUser = () => {
+  return async dispatch => {
+    const res = await axios.get("/auth/logout");
+    if (res) {
+      dispatch({ type: LOGOUT_USER });
+    }
+  };
+};
+
+export const postLocalLogin = (identifier, password) => {
+  return async dispatch => {
+    try {
+      const res = await axios.post("/auth/local", { identifier, password });
+      const user = await axios.get("/auth/current_user");
+      dispatch({
+        type: GET_CURRENT_USER,
+        user: user.data
+      });
+    } catch (error) {
+      dispatch({ type: LOGIN_ERROR, error });
+    }
   };
 };

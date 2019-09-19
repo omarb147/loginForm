@@ -5,86 +5,25 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { db, TABLES } = require("../db");
 
-auth.get("/facebook", passport.authenticate("facebook", { scope: ["email"], session: false }));
+auth.get("/facebook", passport.authenticate("facebook", { scope: ["email"] }));
 
 // REFACTOR THE Login PROCESSS - JWT section
-auth.get("/facebook/callback", function(req, res, next) {
-  passport.authenticate(
-    "facebook",
-    { scope: ["email"], session: false },
-
-    (err, user, info) => {
-      if (err || !user) {
-        return res.status(400).json({ msg: "something went wrong", user });
-      }
-
-      req.logIn(user, { session: false }, err => {
-        if (err) return res.send(err);
-        const token = jwt.sign(user, process.env.JWT_SECRET);
-        return res.json({ user, token });
-      });
-    }
-  )(req, res, next);
+auth.get("/facebook/callback", passport.authenticate("facebook", { scope: ["email"] }), (req, res) => {
+  res.redirect("/");
 });
 
-auth.get("/google", function(req, res, next) {
-  passport.authenticate(
-    "google",
-    { scope: ["email", "profile"], session: false },
+auth.get("/google", passport.authenticate("google", { scope: ["email", "profile"] }));
 
-    (err, user, info) => {
-      if (err || !user) {
-        return res.status(400).json({ msg: "something went wrong", user });
-      }
-
-      req.logIn(user, { session: false }, err => {
-        if (err) return res.send(err);
-        const token = jwt.sign(user, process.env.JWT_SECRET);
-        return res.json({ user, token });
-      });
-    }
-  )(req, res, next);
+auth.get("/google/callback", passport.authenticate("google"), (req, res) => {
+  return res.redirect("/");
 });
 
-auth.get("/google/callback", function(req, res, next) {
-  passport.authenticate("google", { session: false }, (err, user, info) => {
-    if (err || !user) {
-      return res.status(400).json({ msg: "something went wrong", user });
-    }
-    req.logIn(user, { session: false }, err => {
-      if (err) return res.send(err);
-      const token = jwt.sign(user, process.env.JWT_SECRET);
-      return res.json({ user, token });
-    });
-  })(req, res, next);
-});
-
-auth.post("/local", function(req, res, next) {
-  passport.authenticate("local", { session: false }, (err, user, info) => {
-    if (err || !user) {
-      return res.status(400).json({ msg: "something went wrong", user });
-    }
-
-    req.logIn(user, { session: false }, err => {
-      if (err) return res.send(err);
-      const token = jwt.sign(user, process.env.JWT_SECRET);
-      return res.json({ user, token });
-    });
-  })(req, res, next);
+auth.post("/local", passport.authenticate("local"), (req, res) => {
+  return res.redirect("/");
 });
 
 auth.post("/register", async (req, res) => {
   const { identifier, password } = req.body;
-
-  // try {
-  //   const hash = await bcrypt.hash(password, 10);
-  //   await findUserOrInsert(identifier, { identifier, password_hash: hash, provider: "local" }, (error, user) => {
-  //     if (error) return res.status(400).send({ msg: "something went wrong" });
-  //   });
-  // } catch (err) {
-  //   console.error(err.message);
-  //   res.staus(400).send({});
-  // }
 
   try {
     const existingUser = await db(TABLES.USERS)
@@ -111,4 +50,14 @@ auth.post("/register", async (req, res) => {
     res.status(500).send({ message: "something went wrong" });
   }
 });
+
+auth.get("/current_user", (req, res) => {
+  res.send(req.user);
+});
+
+auth.get("/logout", (req, res) => {
+  req.logout();
+  res.send(req.user);
+});
+
 module.exports = auth;
