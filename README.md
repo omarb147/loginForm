@@ -58,4 +58,5 @@ GOOGLE_CLIENT_SECRET
 
 ## Todos
 - [ ] Update error handling for uncaught cases
+- [ ] Implement email and password signup form on frontend
 - [ ] implement user information/ profile data which is changable by the user (both on backend and frontend)
