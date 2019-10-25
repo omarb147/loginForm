@@ -7,7 +7,7 @@ Initial page - with login form
 <img src="LoginAppForm.png" width="100%"/>
 
 View once loggedIn 
-<img src="LoginAppHome.png" width="100%/>
+<img src="LoginAppHome.png" width="100%"/>
 
 
 ## Functionality
